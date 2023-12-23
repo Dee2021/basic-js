@@ -1,32 +1,63 @@
 const { NotImplementedError } = require('../extensions/index.js');
 
-/**
- * Implement class VigenereCipheringMachine that allows us to create
- * direct and reverse ciphering machines according to task description
- * 
- * @example
- * 
- * const directMachine = new VigenereCipheringMachine();
- * 
- * const reverseMachine = new VigenereCipheringMachine(false);
- * 
- * directMachine.encrypt('attack at dawn!', 'alphonse') => 'AEIHQX SX DLLU!'
- * 
- * directMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => 'ATTACK AT DAWN!'
- * 
- * reverseMachine.encrypt('attack at dawn!', 'alphonse') => '!ULLD XS XQHIEA'
- * 
- * reverseMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => '!NWAD TA KCATTA'
- * 
- */
 class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  constructor(isDirect = true) {
+    this.isDirect = isDirect;
   }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+
+  generateKey(message, key) {
+    let generatedKey = '';
+
+    for (let i = 0, j = 0; i < message.length; i++) {
+      if (message[i].match(/[A-Za-z]/)) {
+        generatedKey += key[j % key.length].toUpperCase();
+        j++;
+      } else {
+        generatedKey += message[i];
+      }
+    }
+
+    return generatedKey;
+  }
+
+  transformMessage(message, key, encrypt = true) {
+    let result = '';
+
+    for (let i = 0; i < message.length; i++) {
+      if (message[i].match(/[A-Za-z]/)) {
+        const messageCharCode = message[i].toUpperCase().charCodeAt(0) - 65;
+        const keyCharCode = key[i % key.length].toUpperCase().charCodeAt(0) - 65;
+        const offset = encrypt ? (messageCharCode + keyCharCode) % 26 : (messageCharCode - keyCharCode + 26) % 26;
+        const transformedChar = String.fromCharCode(offset + 65);
+        result += transformedChar;
+      } else {
+        result += message[i];
+      }
+    }
+
+    return result;
+  }
+
+  encrypt(message, key) {
+    if (!message || !key) {
+      throw new Error('Incorrect arguments!');
+    }
+
+    const generatedKey = this.generateKey(message, key);
+    const encryptedMessage = this.transformMessage(message, generatedKey, true);
+
+    return this.isDirect ? encryptedMessage : encryptedMessage.split('').reverse().join('');
+  }
+
+  decrypt(encryptedMessage, key) {
+    if (!encryptedMessage || !key) {
+      throw new Error('Incorrect arguments!');
+    }
+
+    const generatedKey = this.generateKey(encryptedMessage, key);
+    const decryptedMessage = this.transformMessage(encryptedMessage, generatedKey, false);
+
+    return this.isDirect ? decryptedMessage : decryptedMessage.split('').reverse().join('');
   }
 }
 
