@@ -6,8 +6,8 @@ const { NotImplementedError } = require('../extensions/index.js');
  * in the neighboring cells. Starting off with some arrangement of mines
  * we want to create a Minesweeper game setup.
  *
- * @param {Array<Array>} matrix
- * @return {Array<Array>}
+ * @param {Array<Array<boolean>>} matrix
+ * @return {Array<Array<number>>}
  *
  * @example
  * matrix = [
@@ -23,9 +23,39 @@ const { NotImplementedError } = require('../extensions/index.js');
  *  [1, 1, 1]
  * ]
  */
-function minesweeper(/* matrix */) {
-  throw new NotImplementedError('Not implemented');
-  // remove line with error and write your code here
+function minesweeper(matrix) {
+  if (!matrix || matrix.length === 0) {
+    throw new NotImplementedError('Matrix is not provided.');
+  }
+
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+
+  const resultMatrix = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  const isValidCell = (row, col) => row >= 0 && row < rows && col >= 0 && col < cols;
+
+  const directions = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1],           [0, 1],
+    [1, -1], [1, 0], [1, 1]
+  ];
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      if (matrix[row][col]) {
+        for (const [dRow, dCol] of directions) {
+          const newRow = row + dRow;
+          const newCol = col + dCol;
+          if (isValidCell(newRow, newCol)) {
+            resultMatrix[newRow][newCol]++;
+          }
+        }
+      }
+    }
+  }
+
+  return resultMatrix;
 }
 
 module.exports = {
